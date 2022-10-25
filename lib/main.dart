@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pokemon_pictorial_book/poke_detail.dart';
 import 'package:pokemon_pictorial_book/poke_list_item.dart';
 
 void main() {
@@ -11,8 +10,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TopPage(),
+    ThemeMode mode = ThemeMode.system;
+    return MaterialApp(
+      title: 'Pokemon Pictorial Book',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: mode,
+      home: const TopPage(),
     );
   }
 }
