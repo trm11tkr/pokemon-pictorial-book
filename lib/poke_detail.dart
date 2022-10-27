@@ -10,38 +10,75 @@ class PokeDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Details')),
-      body: Center(
-          child: pokemon != null
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      pokemon!.imageUrl,
-                      height: 100,
-                      width: 100,
+      body: SafeArea(
+        child: pokemon != null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ListTile(
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    Text(
-                      pokemon!.name,
-                      style: const TextStyle(
-                          fontSize: 26, fontWeight: FontWeight.bold),
-                    ),
-                    Chip(
-                      label: Text(
-                        pokemon!.types.join(' , '),
-                        style: TextStyle(
-                          color: Colors.yellow.computeLuminance() > 0.5
-                              ? Colors.black
-                              : Colors.white,
+                  ),
+                  const Spacer(),
+                  Stack(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(32),
+                        child: Image.network(
+                          pokemon!.imageUrl,
+                          height: 100,
+                          width: 100,
                         ),
                       ),
-                      backgroundColor: (pokeTypeColors[pokemon!.types.first] ??
-                              Colors.grey[100])
-                          ?.withOpacity(.3),
-                    )
-                  ],
-                )
-              : const Text('Not Found')),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          'No.${pokemon!.id}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    pokemon!.name,
+                    style: const TextStyle(
+                        fontSize: 36, fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: pokemon!.types
+                        .map(
+                          (type) => Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Chip(
+                              backgroundColor:
+                                  pokeTypeColors[type] ?? Colors.grey,
+                              label: Text(
+                                type,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: (pokeTypeColors[type] ?? Colors.grey)
+                                              .computeLuminance() >
+                                          0.5
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const Spacer(),
+                ],
+              )
+            : const Center(child: Text('Not Found')),
+      ),
     );
   }
 }
