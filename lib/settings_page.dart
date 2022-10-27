@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pokemon_pictorial_book/utils/theme_mode.dart';
+import 'package:pokemon_pictorial_book/models/theme_mode.dart';
+import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -9,36 +10,36 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  String _showCurrentThemeMode() {
-    return _themeMode == ThemeMode.system
+  String _showCurrentThemeMode(ThemeMode themeMode) {
+    return themeMode == ThemeMode.system
         ? 'System'
-        : _themeMode == ThemeMode.light
+        : themeMode == ThemeMode.light
             ? 'Light'
             : 'Dark';
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.lightbulb),
-          title: const Text('Dark/Light Mode'),
-          trailing: Text(_showCurrentThemeMode()),
-          onTap: () async {
-            final ret =
-                await Navigator.of(context).push<ThemeMode>(MaterialPageRoute(
-              builder: (context) => ThemeModeSelectionPage(init: _themeMode),
-            ));
-            setState(() {
-              _themeMode = ret ?? ThemeMode.system;
-            });
-            await saveThemeMode(_themeMode);
-          },
-        ),
-      ],
+    return Consumer<ThemeModeNotifier>(
+      builder: (context, themeMode, child) => ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.lightbulb),
+            title: const Text('Dark/Light Mode'),
+            trailing: Text(_showCurrentThemeMode(themeMode.mode)),
+            onTap: () async {
+              final ret =
+                  await Navigator.of(context).push<ThemeMode>(MaterialPageRoute(
+                builder: (context) =>
+                    ThemeModeSelectionPage(init: themeMode.mode),
+              ));
+              if (ret != null) {
+                themeMode.update(ret);
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

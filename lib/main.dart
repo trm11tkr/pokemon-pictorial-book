@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:pokemon_pictorial_book/models/theme_mode.dart';
 import 'package:pokemon_pictorial_book/utils/theme_mode.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'poke_list.dart';
 import 'settings_page.dart';
 
-void main() {
-  runApp(const App());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final SharedPreferences pref = await SharedPreferences.getInstance();
+  final themeModeNotifier = ThemeModeNotifier(pref);
+  runApp(ChangeNotifierProvider(
+    create: (context) => themeModeNotifier,
+    child: const App(),
+  ));
 }
 
 class App extends StatefulWidget {
@@ -26,13 +35,16 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pokemon Pictorial Book',
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: themeMode,
-      home: const TopPage(),
-    );
+    return Consumer<ThemeModeNotifier>(builder: (context, themeMode, child) {
+      print(themeMode);
+      return MaterialApp(
+        title: 'Pokemon Pictorial Book',
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: themeMode.mode,
+        home: const TopPage(),
+      );
+    });
   }
 }
 
