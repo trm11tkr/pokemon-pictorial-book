@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pokemon_pictorial_book/poke_list_item.dart';
+
+import 'poke_list.dart';
+import 'settings_page.dart';
 
 void main() {
   runApp(const App());
@@ -21,15 +23,34 @@ class App extends StatelessWidget {
   }
 }
 
-class TopPage extends StatelessWidget {
+class TopPage extends StatefulWidget {
   const TopPage({super.key});
+
+  @override
+  State<TopPage> createState() => _TopPageState();
+}
+
+class _TopPageState extends State<TopPage> {
+  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: ListView.builder(
-      itemBuilder: ((context, index) => PokeListItem(index: index)),
-      itemCount: 10,
-    ));
+      body: SafeArea(
+        child: currentIndex == 0 ? const PokeList() : const Settings(),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+          onTap: (value) {
+            setState(() {
+              currentIndex = value;
+            });
+          },
+          currentIndex: currentIndex,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'home'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: 'settings'),
+          ]),
+    );
   }
 }
