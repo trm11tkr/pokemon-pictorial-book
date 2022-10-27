@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokemon_pictorial_book/utils/theme_mode.dart';
 
 import 'poke_list.dart';
 import 'settings_page.dart';
@@ -7,17 +8,29 @@ void main() {
   runApp(const App());
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  ThemeMode themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    loadThemeMode().then((val) => setState(() => themeMode = val));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    ThemeMode mode = ThemeMode.system;
     return MaterialApp(
       title: 'Pokemon Pictorial Book',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: mode,
+      themeMode: themeMode,
       home: const TopPage(),
     );
   }
