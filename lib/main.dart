@@ -36,7 +36,6 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeModeNotifier>(builder: (context, themeMode, child) {
-      print(themeMode);
       return MaterialApp(
         title: 'Pokemon Pictorial Book',
         theme: ThemeData.light(),
