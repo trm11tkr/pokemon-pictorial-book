@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pokemon_pictorial_book/const/poke_api.dart';
 import 'package:pokemon_pictorial_book/models/favorite.dart';
 import 'package:pokemon_pictorial_book/models/pokemon.dart';
+import 'package:pokemon_pictorial_book/poke_grid_item.dart';
 import 'package:pokemon_pictorial_book/poke_list_item.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +17,7 @@ class _PokeListState extends State<PokeList> {
   static const int pageSize = 30;
 
   bool isFavoriteMode = false;
+  bool isGridMode = false;
   int _currentPage = 1;
 
   int itemCount(int favsCount, int page) {
@@ -48,14 +50,34 @@ class _PokeListState extends State<PokeList> {
     }
   }
 
+  Widget buildMoreTile(bool isLastPage) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: isLastPage
+          ? null
+          : () => {
+                setState(() => _currentPage++),
+              },
+      child: const Text('more'),
+    );
+  }
+
   void changeFavMode(bool currentMode) {
     setState(() => isFavoriteMode = !currentMode);
+  }
+
+  void changeGridMode(bool currentMode) {
+    setState(() => isGridMode = !currentMode);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<FavoritesNotifier>(
-      builder: (context, value, child) => Column(
+      builder: (context, favs, child) => Column(
         children: [
           Container(
             height: 24,
@@ -76,6 +98,8 @@ class _PokeListState extends State<PokeList> {
                     return ViewModeBottomSheet(
                       favMode: isFavoriteMode,
                       changeFavMode: changeFavMode,
+                      gridMode: isGridMode,
+                      changeGridMode: changeGridMode,
                     );
                   },
                 );
@@ -87,29 +111,46 @@ class _PokeListState extends State<PokeList> {
           ),
           Expanded(
             child: Consumer<PokemonNotifier>(builder: (context, pokes, child) {
-              return itemCount(value.favs.length, _currentPage) == 0
+              return itemCount(favs.favs.length, _currentPage) == 0
                   ? const Text('No Data')
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 16),
-                      itemCount: itemCount(value.favs.length, _currentPage) + 1,
-                      itemBuilder: (context, index) {
-                        if (index ==
-                            itemCount(value.favs.length, _currentPage)) {
-                          return OutlinedButton(
-                              onPressed:
-                                  !isLastPage(value.favs.length, _currentPage)
-                                      ? () => {
-                                            setState(() => _currentPage++),
-                                          }
-                                      : null,
-                              child: const Text('more'));
-                        } else {
-                          return PokeListItem(
-                            pokemon: pokes.byId(itemId(value.favs, index)),
-                          );
-                        }
-                      });
+                  : isGridMode
+                      ? GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                          ),
+                          itemCount:
+                              itemCount(favs.favs.length, _currentPage) + 1,
+                          itemBuilder: (context, index) {
+                            if (index ==
+                                itemCount(favs.favs.length, _currentPage)) {
+                              return Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: buildMoreTile(isLastPage(
+                                      favs.favs.length, _currentPage)));
+                            } else {
+                              return PokeGridItem(
+                                pokemon: pokes.byId(itemId(favs.favs, index)),
+                              );
+                            }
+                          },
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 4, horizontal: 16),
+                          itemCount:
+                              itemCount(favs.favs.length, _currentPage) + 1,
+                          itemBuilder: (context, index) {
+                            if (index ==
+                                itemCount(favs.favs.length, _currentPage)) {
+                              return buildMoreTile(
+                                  isLastPage(favs.favs.length, _currentPage));
+                            } else {
+                              return PokeListItem(
+                                pokemon: pokes.byId(itemId(favs.favs, index)),
+                              );
+                            }
+                          });
             }),
           ),
         ],
@@ -123,11 +164,17 @@ class ViewModeBottomSheet extends StatelessWidget {
     Key? key,
     required this.favMode,
     required this.changeFavMode,
+    required this.gridMode,
+    required this.changeGridMode,
   }) : super(key: key);
   final bool favMode;
-  final void Function(bool) changeFavMode;
+  final Function(bool) changeFavMode;
+  final bool gridMode;
+  final Function(bool) changeGridMode;
 
-  String get mainText => '表示設定';
+  String mainText(bool fav) {
+    return '表示設定';
+  }
 
   String menuFavTitle(bool fav) {
     if (fav) {
@@ -142,6 +189,22 @@ class ViewModeBottomSheet extends StatelessWidget {
       return '全てのポケモンが表示されます';
     } else {
       return 'お気に入りに登録したポケモンのみが表示されます';
+    }
+  }
+
+  String menuGridTitle(bool grid) {
+    if (grid) {
+      return 'リスト表示に切り替え';
+    } else {
+      return 'グリッド表示に切り替え';
+    }
+  }
+
+  String menuGridSubtitle(bool grid) {
+    if (grid) {
+      return 'ポケモンをグリッド表示します';
+    } else {
+      return 'ポケモンをリスト表示します';
     }
   }
 
@@ -164,7 +227,7 @@ class ViewModeBottomSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: Text(
-                mainText,
+                mainText(favMode),
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -181,6 +244,19 @@ class ViewModeBottomSheet extends StatelessWidget {
               ),
               onTap: () {
                 changeFavMode(favMode);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.grid_3x3),
+              title: Text(
+                menuGridTitle(gridMode),
+              ),
+              subtitle: Text(
+                menuGridSubtitle(gridMode),
+              ),
+              onTap: () {
+                changeGridMode(gridMode);
                 Navigator.pop(context);
               },
             ),
