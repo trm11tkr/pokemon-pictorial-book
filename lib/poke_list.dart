@@ -32,7 +32,7 @@ class _PokeListState extends State<PokeList> {
   int itemId(List<Favorite> favs, int index) {
     int ret = index + 1;
     if (isFavoriteMode) {
-      ret = ret = favs[index].pokeId;
+      ret = favs[index].pokeId;
     }
     return ret;
   }
