@@ -79,35 +79,11 @@ class _PokeListState extends State<PokeList> {
     return Consumer<FavoritesNotifier>(
       builder: (context, favs, child) => Column(
         children: [
-          Container(
-            height: 24,
-            alignment: Alignment.topRight,
-            child: IconButton(
-              padding: const EdgeInsets.all(0),
-              icon: const Icon(Icons.auto_awesome_outlined),
-              onPressed: () async {
-                var ret = await showModalBottomSheet<bool>(
-                  context: context,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40),
-                      topRight: Radius.circular(40),
-                    ),
-                  ),
-                  builder: (BuildContext context) {
-                    return ViewModeBottomSheet(
-                      favMode: isFavoriteMode,
-                      changeFavMode: changeFavMode,
-                      gridMode: isGridMode,
-                      changeGridMode: changeGridMode,
-                    );
-                  },
-                );
-                if (ret != null && ret) {
-                  changeFavMode(isFavoriteMode);
-                }
-              },
-            ),
+          TopHeadMenu(
+            isFavoriteMode: isFavoriteMode,
+            changeFavMode: changeFavMode,
+            isGridMode: isGridMode,
+            changeGridMode: changeGridMode,
           ),
           Expanded(
             child: Consumer<PokemonNotifier>(builder: (context, pokes, child) {
@@ -154,6 +130,51 @@ class _PokeListState extends State<PokeList> {
             }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TopHeadMenu extends StatelessWidget {
+  const TopHeadMenu({
+    Key? key,
+    required this.isFavoriteMode,
+    required this.changeFavMode,
+    required this.isGridMode,
+    required this.changeGridMode,
+  }) : super(key: key);
+  final bool isFavoriteMode;
+  final Function(bool) changeFavMode;
+  final bool isGridMode;
+  final Function(bool) changeGridMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      alignment: Alignment.topRight,
+      child: IconButton(
+        padding: const EdgeInsets.all(0),
+        icon: const Icon(Icons.auto_awesome_outlined),
+        onPressed: () async {
+          await showModalBottomSheet<void>(
+            context: context,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(40),
+                topRight: Radius.circular(40),
+              ),
+            ),
+            builder: (BuildContext context) {
+              return ViewModeBottomSheet(
+                favMode: isFavoriteMode,
+                changeFavMode: changeFavMode,
+                gridMode: isGridMode,
+                changeGridMode: changeGridMode,
+              );
+            },
+          );
+        },
       ),
     );
   }
